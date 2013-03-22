@@ -5,14 +5,55 @@ do
   -- Create the protocol fields
 	local pdutypes= {[0]="CONFIRMABLE", [1]="NON-CONFIRMABLE", [2]="ACKNOWLEDGEMENT", [3]="RESET"}
   
-  -- TODO add all codes
-  local codes= {[1]="GET",[69]="2.05 content"}
+  local codes= {
+    [1]="GET",[2]="POST",[3]="PUT",[4]="DELETE",
+    [65]="2.01 Created",
+    [66]="2.02 Deleted",
+    [67]="2.03 Valid",
+    [68]="2.04 Changed",
+    [69]="2.05 Content",
+    [128]="4.00 Bad Request",
+    [129]="4.01 Unauthorized",
+    [130]="4.02 Bad Option",                
+    [131]="4.03 Forbidden",
+    [132]="4.04 Not Found",
+    [133]="4.05 Method Not Allowed",
+    [134]="4.06 Not Acceptable",
+    [140]="4.12 Precondition Failed",
+    [141]="4.13 Request Entity Too Large",
+    [143]="4.15 Unsupported Content-Format",
+    [160]="5.00 Internal Server Error",
+    [161]="5.01 Not Implemented",
+    [162]="5.02 Bad Gateway",
+    [163]="5.03 Service Unavailable",
+    [164]="5.04 Gateway Timeout",
+    [165]="5.05 Proxying Not Supported" }
   
-  -- TODO add all options
-  local options= {[11]="URI-Path", [12]="Content-Format",[14]="Max-Age"}
+  local options= {
+    [1]="If-Match",
+    [3]="Uri-Host",
+    [4]="ETag",
+    [5]="If-None-Match",
+    [7]="Uri-Port",
+    [8]="Location-Path",
+    [11]="URI-Path",
+    [12]="Content-Format",
+    [14]="Max-Age",
+    [15]="Uri-Query",
+    [16]="Accept",
+    [20]="Location-Query",
+    [35]="Proxy-Uri",
+    [39]="Proxy-Scheme"
+    }
   
-  -- TODO add other content formats
-  local contentFormats =  {[0]="text/plain; charset=utf-8", [40]="application/link-format"}
+  local contentFormats =  {
+    [0]="text/plain; charset=utf-8",
+    [40]="application/link-format",
+    [41]="application/xml",
+    [42]="application/octet-stream",
+    [47]="application/exi",
+    [50]="application/json"
+    }
   
 	local f = coap_proto.fields
 	
