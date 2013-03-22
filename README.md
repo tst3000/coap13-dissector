@@ -10,8 +10,5 @@ http://tools.ietf.org/html/draft-ietf-core-coap-13
 TODOs
 ----------------
 
-* add all request/response codes
-* add missing options 
-* add missing content formats
 * implement correct dissection of option length (length: 13 and 14 need to include additional length fields)
 
