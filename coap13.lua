@@ -55,9 +55,9 @@ do
     [50]="application/json"
     }
   
-	local f = coap_proto.fields
+  local f = coap_proto.fields
 	
-	f.version = ProtoField.uint8 ("coap.version",  "Version",nil,nil,0xC0)
+  f.version = ProtoField.uint8 ("coap.version",  "Version",nil,nil,0xC0)
   f.type = ProtoField.uint8 ("coap.type",  "PDU Type",nil,pdutypes,0x30)
   f.tkl = ProtoField.uint8 ("coap.tkl",  "Token Length",nil,nil,0x0f)
   f.code = ProtoField.uint8 ("coap.code",  "Code",nil,codes)
@@ -103,10 +103,24 @@ do
           oLength = 0
         else
           -- TODO: implement different option length when oLength is 13 or 14
+	  local optionStart = i
+	  local optionHeaderLen = 1
+	  if (oLength==0x0d) then
+	    oLength = buffer(i+1,1):uint() + 13
+	    i = i+1
+	    optionHeaderLen = 2
+	    elseif (oLength==0x0e) then
+	    oLength = bit.lshift(buffer(i+1,1):uint(),8) + buffer(i+2,1):uint() + 269
+	    i = i+2
+	    optionHeaderLen = 3
+	    
+	  end
           
+	  print("oLength: "..oLength)
+
           local optType = lastOption + oDelta
-          local otree = subtree:add (f.option, buffer(i,oLength+1), optType)
-          if (optType == 11) then
+          local otree = subtree:add (f.option, buffer(optionStart,oLength+optionHeaderLen), optType)
+          if (optType == 11) or (optType == 8) then
             otree:append_text(" "..buffer(i+1,oLength):string())
           elseif (optType == 12) then
             otree:add (f.contentFormat, buffer(i+1,oLength))
@@ -125,7 +139,7 @@ do
   end
   -- load the udp.port table
   udp_table = DissectorTable.get("udp.port")
-  -- register our protocol to handle udp port 61620
-  udp_table:add(61620,coap_proto)
+  -- register our protocol to handle udp port 5683
+  udp_table:add(5683,coap_proto)
   
 end  

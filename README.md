@@ -10,5 +10,7 @@ http://tools.ietf.org/html/draft-ietf-core-coap-13
 TODOs
 ----------------
 
-* implement correct dissection of option length (length: 13 and 14 need to include additional length fields)
+* Test options length decoding > 268 (2byte option length)
+* Upgrade to CoAP-Draft 14
+* Improve display of messages in list view
 
