@@ -3,7 +3,7 @@ do
   coap_proto = Proto("coap13","CoAP Protocol")
   
   -- Create the protocol fields
-	local pdutypes= {[0]="CONFIRMABLE", [1]="NON-CONFIRMABLE", [2]="ACKNOWLEDGEMENT", [3]="RESET"}
+  local pdutypes= {[0]="CONFIRMABLE", [1]="NON-CONFIRMABLE", [2]="ACKNOWLEDGEMENT", [3]="RESET"}
   
   local codes= {
     [1]="GET",[2]="POST",[3]="PUT",[4]="DELETE",
@@ -43,7 +43,10 @@ do
     [16]="Accept",
     [20]="Location-Query",
     [35]="Proxy-Uri",
-    [39]="Proxy-Scheme"
+    [39]="Proxy-Scheme",
+    [23]="Block2",
+    [28]="Size",
+    [27]="Block1"
     }
   
   local contentFormats =  {
@@ -66,6 +69,12 @@ do
   
   f.option = ProtoField.uint8 ("coap.option", "Option",nil,options)
   f.contentFormat = ProtoField.uint8 ("coap.contentFormat", "Content-Format",nil,contentFormats)
+
+  f.blockOption8Num = ProtoField.uint8 ("coap.blockOption8Num", "Block Numb",nil,nil,0xF0)
+  f.blockOption8More = ProtoField.uint8 ("coap.blockOption8More", "More blocks",nil,nil,0x08)
+  f.blockOption8BlockSize = ProtoField.uint8 ("coap.blockOption8BlockSize", "Block size",nil,nil,0x07)
+
+
   
   f.payload = ProtoField.bytes("coap.payload", "Payload")
   
@@ -78,6 +87,9 @@ do
       subtree:add (f.tkl, buffer (0, 1))
       subtree:add (f.code, buffer (1, 1))
       subtree:add (f.msgid, buffer (2, 2))
+
+      --local tp = bit.band(buffer(0,1):uint(),0x30)
+      --pinfo.cols.info = "CoAP "..tp
       
       local tkl = bit.band(buffer(0,1):uint(),0x0f)
       local i = 4
@@ -102,18 +114,25 @@ do
           i = i + 1
           oLength = 0
         else
-          -- TODO: implement different option length when oLength is 13 or 14
 	  local optionStart = i
 	  local optionHeaderLen = 1
+
+	  -- check if option delta ext. is used
+	  if (oDelta==0x0d) then
+	    oDelta = buffer(i+1,1):uint() + 13
+	    i = i+1
+	    optionHeaderLen = optionHeaderLen + 1
+	  end
+
+	  -- check if option length ext. is used
 	  if (oLength==0x0d) then
 	    oLength = buffer(i+1,1):uint() + 13
 	    i = i+1
-	    optionHeaderLen = 2
-	    elseif (oLength==0x0e) then
+	    optionHeaderLen = optionHeaderLen + 1
+	  elseif (oLength==0x0e) then
 	    oLength = bit.lshift(buffer(i+1,1):uint(),8) + buffer(i+2,1):uint() + 269
 	    i = i+2
-	    optionHeaderLen = 3
-	    
+	    optionHeaderLen = optionHeaderLen + 2
 	  end
           
 	  print("oLength: "..oLength)
@@ -124,6 +143,10 @@ do
             otree:append_text(" "..buffer(i+1,oLength):string())
           elseif (optType == 12) then
             otree:add (f.contentFormat, buffer(i+1,oLength))
+	  elseif (optType == 27 or optType == 23) and oLength == 1 then
+            otree:add (f.blockOption8Num, buffer(i+1,oLength))
+            otree:add (f.blockOption8More, buffer(i+1,oLength))
+            otree:add (f.blockOption8BlockSize, buffer(i+1,oLength))
           end
           
           lastOption = optType
