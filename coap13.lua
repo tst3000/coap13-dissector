@@ -34,6 +34,7 @@ do
     [3]="Uri-Host",
     [4]="ETag",
     [5]="If-None-Match",
+    [6]="Observe",
     [7]="Uri-Port",
     [8]="Location-Path",
     [11]="URI-Path",
@@ -141,7 +142,7 @@ do
           local otree = subtree:add (f.option, buffer(optionStart,oLength+optionHeaderLen), optType)
           if (optType == 11) or (optType == 8) then
             otree:append_text(" "..buffer(i+1,oLength):string())
-          elseif (optType == 12) then
+          elseif (optType == 12)  and oLength > 0 then
             otree:add (f.contentFormat, buffer(i+1,oLength))
 	  elseif (optType == 27 or optType == 23) and oLength == 1 then
             otree:add (f.blockOption8Num, buffer(i+1,oLength))
